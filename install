@@ -1,4 +1,5 @@
 #!/bin/bash
 
 pip install face_recognition
+pip install moviepy
 
