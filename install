@@ -1,5 +1,18 @@
 #!/bin/bash
 
-pip install face_recognition
-pip install moviepy
-pip install opencv-python
+# Activate conda
+source activate tom
+conda install jupyter
+
+# Install Dlib
+git clone https://github.com/davisking/dlib.git
+cd dlib
+mkdir build
+cd build
+cmake .. -DUSE_AVX_INSTRUCTIONS=1
+cmake --build .
+cd ..
+
+# Install
+python setup.py install --yes USE_AVX_INSTRUCTIONS
+
