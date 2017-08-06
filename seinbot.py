@@ -8,6 +8,8 @@ from PIL import Image, ImageDraw
 import plotly.plotly as py
 import plotly.figure_factory as ff
 import plotly 
+import plotly.graph_objs as go
+
 
 # Init
 face_locations = []
@@ -49,27 +51,32 @@ def process(image):
         face_names.append(name)
     return face_names
 
-# Add histogram data
-jerry = np.random.randn(200)-2  
-george = np.random.randn(200)+2  
-elaine = np.random.randn(200)  
-kramer = np.random.randn(200)+4  
+# How many seconds?
+length = int(22.6 * 60);
+
+# Init
+jerry =  [0] * length
+george = [0] * length
+elaine = [0] * length
+kramer = [0] * length
 
 # Process video
-video = VideoFileClip("input_short.mov")
-for t in range(5):
+video = VideoFileClip("input.mkv")
+for t in range(0, length, 10):
     frame = video.get_frame(t)
     characters = process(frame)
     jerry[t]  = 0.0
     elaine[t] = 0.0
     george[t] = 0.0
     kramer[t] = 0.0
-    if 'Jerry'  in characters:  jerry[t] = 1.0
-    if 'George' in characters: george[t] = 1.0
-    if 'Elaine' in characters: elaine[t] = 1.0
-    if 'Kramer' in characters: kramer[t] = 1.0
-    print(characters)
-    print(jerry)
+    if 'Jerry'  in characters:  jerry[t] = 100.0
+    if 'George' in characters: george[t] = 100.0
+    if 'Elaine' in characters: elaine[t] = 100.0
+    if 'Kramer' in characters: kramer[t] = 100.0
+#    print("%0.1f: {}" % (100.0 * t / length), str(characters))
+    print( (t / length), characters)
+#x = np.array(x/60.0 for x in range(length))
+x = np.array(range(length))
 
 # Start Plotly
 plotly.tools.set_credentials_file(username='TomJacobs', api_key='juXJEk8RkE5bfaydkE4A')
@@ -78,12 +85,62 @@ plotly.tools.set_credentials_file(username='TomJacobs', api_key='juXJEk8RkE5bfay
 hist_data = [jerry, george, elaine, kramer]
 group_labels = ['Jerry', 'George', 'Elaine', 'Kramer']
 
-# Create distplot with custom bin_size
-fig = ff.create_distplot(hist_data, group_labels, bin_size=.2)
+# Add data to create cumulative stacked values
+y0_stack=jerry
+y1_stack=george
+y2_stack=elaine
+y3_stack=kramer
+#y1_stack=[y0+y1 for y0, y1 in zip(jerry, george)]
+#y2_stack=[y0+y1+y2 for y0, y1, y2 in zip(jerry, george, elaine)]
+#y3_stack=[y0+y1+y2+y3 for y0, y1, y2, y3 in zip(jerry, george, elaine, kramer)]
+
+# Make original values strings and add % for hover text
+y0_txt=[str(y0)+'%' for y0 in jerry]
+y1_txt=[str(y1)+'%' for y1 in george]
+y2_txt=[str(y2)+'%' for y2 in elaine]
+y3_txt=[str(y3)+'%' for y3 in kramer]
+
+jerry = go.Scatter(
+    x=x,
+    y=y0_stack,
+    text="Jerry",
+    hoverinfo='x+text',
+    mode='lines',
+    line=dict(width=0.5, color='rgb(100, 90, 241)'),
+    fill='tonexty'
+)
+trace1 = go.Scatter(
+    x=x,
+    y=y1_stack,
+    text="George",
+    hoverinfo='x+text',
+    mode='lines',
+    line=dict(width=0.5, color='rgb(111, 231, 119)'),
+    fill='tonexty'
+)
+trace2 = go.Scatter(
+    x=x,
+    y=y2_stack,
+    text="Elaine",
+    hoverinfo='x+text',
+    mode='lines',
+    line=dict(width=0.5, color='rgb(224, 47, 12)'),
+    fill='tonexty'
+)
+trace3 = go.Scatter(
+    x=x,
+    y=y2_stack,
+    text="Kramer",
+    hoverinfo='x+text',
+    mode='lines',
+    line=dict(width=0.5, color='rgb(4, 7, 12)'),
+    fill='tonexty'
+)
+data = [jerry, trace1, trace2, trace3]
+fig = go.Figure(data=data)
 
 # Plot!
 py.iplot(fig, filename='Screen Time')
-
 
 # Define video function
 def create_video(pipeline_in, input_video, output_video):
