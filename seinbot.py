@@ -61,7 +61,7 @@ elaine = [0] * length
 kramer = [0] * length
 
 # Process video
-video = VideoFileClip("input.mkv")
+video = VideoFileClip("Seinfeld.S03E01.mkv")
 for t in range(0, length, 10):
     frame = video.get_frame(t)
     characters = process(frame)
@@ -70,77 +70,55 @@ for t in range(0, length, 10):
     george[t] = 0.0
     kramer[t] = 0.0
     if 'Jerry'  in characters:  jerry[t] = 100.0
-    if 'George' in characters: george[t] = 100.0
-    if 'Elaine' in characters: elaine[t] = 100.0
-    if 'Kramer' in characters: kramer[t] = 100.0
+    if 'George' in characters: george[t] = 75.0
+    if 'Elaine' in characters: elaine[t] = 50.0
+    if 'Kramer' in characters: kramer[t] = 25.0
 #    print("%0.1f: {}" % (100.0 * t / length), str(characters))
     print( (t / length), characters)
 #x = np.array(x/60.0 for x in range(length))
 x = np.array(range(length))
+x = x / 60.0
 
 # Start Plotly
 plotly.tools.set_credentials_file(username='TomJacobs', api_key='juXJEk8RkE5bfaydkE4A')
 
-# Group data together
-hist_data = [jerry, george, elaine, kramer]
-group_labels = ['Jerry', 'George', 'Elaine', 'Kramer']
+width = 30
 
-# Add data to create cumulative stacked values
-y0_stack=jerry
-y1_stack=george
-y2_stack=elaine
-y3_stack=kramer
-#y1_stack=[y0+y1 for y0, y1 in zip(jerry, george)]
-#y2_stack=[y0+y1+y2 for y0, y1, y2 in zip(jerry, george, elaine)]
-#y3_stack=[y0+y1+y2+y3 for y0, y1, y2, y3 in zip(jerry, george, elaine, kramer)]
-
-# Make original values strings and add % for hover text
-y0_txt=[str(y0)+'%' for y0 in jerry]
-y1_txt=[str(y1)+'%' for y1 in george]
-y2_txt=[str(y2)+'%' for y2 in elaine]
-y3_txt=[str(y3)+'%' for y3 in kramer]
-
-jerry = go.Scatter(
-    x=x,
-    y=y0_stack,
-    text="Jerry",
-    hoverinfo='x+text',
-    mode='lines',
-    line=dict(width=0.5, color='rgb(100, 90, 241)'),
-    fill='tonexty'
-)
+# Create plot
 trace1 = go.Scatter(
     x=x,
-    y=y1_stack,
-    text="George",
-    hoverinfo='x+text',
-    mode='lines',
-    line=dict(width=0.5, color='rgb(111, 231, 119)'),
-    fill='tonexty'
+    y=jerry,
+    name = '<b>Jerry</b>',
+    connectgaps=False,
+    line = dict(color=('rgb(22,96,167)'), width=width)
 )
 trace2 = go.Scatter(
     x=x,
-    y=y2_stack,
-    text="Elaine",
-    hoverinfo='x+text',
-    mode='lines',
-    line=dict(width=0.5, color='rgb(224, 47, 12)'),
-    fill='tonexty'
+    y=george,
+    name = 'George',
+    connectgaps=False,
+    line = dict(color=('rgb(205,12,24)'), width=width)
 )
 trace3 = go.Scatter(
     x=x,
-    y=y2_stack,
-    text="Kramer",
-    hoverinfo='x+text',
-    mode='lines',
-    line=dict(width=0.5, color='rgb(4, 7, 12)'),
-    fill='tonexty'
+    y=elaine,
+    name = 'Elaine',
+    connectgaps=False,
+    line = dict(color=('rgb(12,205,204)'), width=width)
 )
-data = [jerry, trace1, trace2, trace3]
-fig = go.Figure(data=data)
+trace4 = go.Scatter(
+    x=x,
+    y=kramer,
+    name = 'Kramer',
+    connectgaps=False,
+    line = dict(color=('rgb(25,12,24)'), width=width),
+)
 
-# Plot!
+# Plot
+data = [trace1, trace2, trace3, trace4]
+fig = dict(data=data)
 py.iplot(fig, filename='Screen Time')
+
 
 # Define video function
 def create_video(pipeline_in, input_video, output_video):
